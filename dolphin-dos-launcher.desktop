@@ -1,0 +1,17 @@
+[Desktop Entry]
+Type=Service
+MimeType=application/octet-stream;application/x-ms-dos-executable;application/x-executable;application/x-msdos-program;application/x-bat;application/x-ms-dos-batch;application/x-shellscript;text/x-msdos-batch;application/x-iso9660-image;application/x-cd-image;application/x-cue;application/x-cue-sheet;
+X-KDE-Protocols=file
+X-KDE-RequiredNumberOfUrls=1
+Actions=configure;quick;
+X-KDE-Submenu=Abrir juego DOS
+
+[Desktop Action configure]
+Name=Configurar e iniciar / montar CD
+Icon=applications-games
+Exec=@EXECUTABLE@ %f
+
+[Desktop Action quick]
+Name=Iniciar con ajustes guardados
+Icon=media-playback-start
+Exec=@EXECUTABLE@ --quick %f
