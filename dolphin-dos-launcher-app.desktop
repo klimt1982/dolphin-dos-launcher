@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Abrir juego DOS
+Comment=Configurar juegos DOS con DOSBox Staging desde Dolphin
+Exec=dolphin-dos-launcher %f
+Icon=dolphin-dos-launcher
+NoDisplay=true
+Terminal=false
+Categories=Game;Emulator;

@@ -9,8 +9,11 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
-import tkinter as tk
-from tkinter import filedialog, messagebox, ttk
+from PyQt6.QtGui import QIcon, QGuiApplication
+from PyQt6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDialog,
+                             QDialogButtonBox, QFileDialog, QFormLayout,
+                             QFrame, QHBoxLayout, QLabel, QLineEdit, QMessageBox,
+                             QPushButton, QScrollArea, QVBoxLayout, QWidget)
 from urllib.parse import unquote, urlparse
 
 APP = 'dolphin-dos-launcher'
@@ -208,50 +211,112 @@ def launch(path, profile):
     subprocess.Popen(args, cwd=str(path.parent), start_new_session=True, stdin=subprocess.DEVNULL)
 
 
+_qt_application = None
+
+
+def qt_app():
+    global _qt_application
+    app = QApplication.instance()
+    if app is None:
+        app = QApplication(sys.argv[:1])
+        app.setApplicationName('dolphin-dos-launcher')
+        app.setApplicationDisplayName('Abrir juego DOS')
+        QGuiApplication.setDesktopFileName('dolphin-dos-launcher')
+        icon = Path(__file__).with_name('dolphin-dos-launcher.svg')
+        if icon.is_file():
+            app.setWindowIcon(QIcon(str(icon)))
+    _qt_application = app
+    return app
+
+
 def show_error(title, message):
     try:
-        root = tk.Tk()
-        root.withdraw()
-        messagebox.showerror(title, message, parent=root)
-        root.destroy()
-    except tk.TclError:
+        qt_app()
+        QMessageBox.critical(None, title, message)
+    except Exception:
         print(f'{title}: {message}', file=sys.stderr)
 
 
+def combo(options, saved):
+    widget = QComboBox()
+    for label, value in options.items():
+        widget.addItem(label, value)
+    index = widget.findData(saved)
+    widget.setCurrentIndex(max(index, 0))
+    return widget
+
+
+def path_field(value, directory=False):
+    row = QWidget()
+    layout = QHBoxLayout(row)
+    layout.setContentsMargins(0, 0, 0, 0)
+    field = QLineEdit(str(value))
+    button = QPushButton('Examinar…')
+    def choose():
+        if directory:
+            selected = QFileDialog.getExistingDirectory(row, 'Elegir carpeta C:', field.text() or str(Path.home()))
+        else:
+            selected, _ = QFileDialog.getOpenFileName(row, 'Elegir imagen de CD', str(Path.home()),
+                                                       'Imágenes de CD (*.iso *.ISO *.cue *.CUE *.mds *.MDS)')
+        if selected:
+            field.setText(selected)
+    button.clicked.connect(choose)
+    layout.addWidget(field, 1)
+    layout.addWidget(button)
+    return row, field
+
+
+def dialog_shell(title, filename, parent_dir):
+    dialog = QDialog()
+    dialog.setWindowTitle(title)
+    dialog.setMinimumWidth(570)
+    body = QWidget()
+    layout = QVBoxLayout(body)
+    heading = QLabel(filename)
+    font = heading.font()
+    font.setPointSize(font.pointSize() + 3)
+    font.setBold(True)
+    heading.setFont(font)
+    layout.addWidget(heading)
+    where = QLabel(str(parent_dir))
+    where.setWordWrap(True)
+    layout.addWidget(where)
+    form = QFormLayout()
+    form.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.ExpandingFieldsGrow)
+    layout.addLayout(form)
+    scroll = QScrollArea()
+    scroll.setWidgetResizable(True)
+    scroll.setFrameShape(QFrame.Shape.NoFrame)
+    scroll.setWidget(body)
+    outer = QVBoxLayout(dialog)
+    outer.addWidget(scroll)
+    dialog.resize(650, 550)
+    return dialog, layout, form, outer
+
+
 def configure_media(path, profiles):
-    root = tk.Tk()
-    root.title('Montar CD en DOSBox Staging')
-    root.resizable(False, False)
-    frame = ttk.Frame(root, padding=20)
-    frame.grid(sticky='nsew')
-    ttk.Label(frame, text=path.name, font=('Sans', 13, 'bold')).grid(row=0, column=0, columnspan=2, sticky='w', pady=(0, 10))
-    ttk.Label(frame, text='El disco se montará como D:. Elegí una carpeta donde instalar el juego como C:.',
-              wraplength=430).grid(row=1, column=0, columnspan=2, sticky='w', pady=(0, 12))
+    qt_app()
     profile = profiles.get(str(path), {})
     if not isinstance(profile, dict):
         profile = {}
-    install_dir = tk.StringVar(value=str(profile.get('root_dir') or path.parent))
-    fullscreen = tk.BooleanVar(value=bool(profile.get('fullscreen', False)))
-    ttk.Label(frame, text='Carpeta C:').grid(row=2, column=0, sticky='w')
-    line = ttk.Frame(frame)
-    line.grid(row=2, column=1, sticky='w')
-    ttk.Entry(line, textvariable=install_dir, width=38).pack(side='left')
-
-    def browse():
-        chosen = filedialog.askdirectory(parent=root, title='Elegir carpeta de instalación (C:)',
-                                         initialdir=install_dir.get())
-        if chosen:
-            install_dir.set(chosen)
-
-    ttk.Button(line, text='Examinar…', command=browse).pack(side='left', padx=(5, 0))
-    ttk.Checkbutton(frame, text='Pantalla completa', variable=fullscreen).grid(row=3, column=0, columnspan=2, sticky='w', pady=(12, 8))
-    ttk.Label(frame, text='DOSBox abrirá D:. Escribí DIR para ver el disco y ejecutá allí INSTALL o SETUP si corresponde.',
-              wraplength=430).grid(row=4, column=0, columnspan=2, sticky='w', pady=(0, 15))
-    buttons = ttk.Frame(frame)
-    buttons.grid(row=5, column=0, columnspan=2, sticky='e')
-
-    def start():
-        selected = {'root_dir': install_dir.get().strip(), 'fullscreen': fullscreen.get()}
+    dialog, layout, form, outer = dialog_shell('Montar CD en DOSBox Staging', path.name, path.parent)
+    note = QLabel('El disco se montará como D:. Elegí una carpeta existente donde instalar el juego como C:.')
+    note.setWordWrap(True)
+    layout.addWidget(note)
+    row, install_dir = path_field(profile.get('root_dir') or path.parent, directory=True)
+    form.addRow('Carpeta C:', row)
+    fullscreen = QCheckBox('Pantalla completa')
+    fullscreen.setChecked(bool(profile.get('fullscreen', False)))
+    layout.addWidget(fullscreen)
+    note2 = QLabel('DOSBox abrirá D:. Escribí DIR y ejecutá INSTALL o SETUP si corresponde.')
+    note2.setWordWrap(True)
+    layout.addWidget(note2)
+    buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Cancel)
+    start = buttons.addButton('Montar y abrir DOSBox', QDialogButtonBox.ButtonRole.AcceptRole)
+    buttons.rejected.connect(dialog.reject)
+    outer.addWidget(buttons)
+    def run():
+        selected = {'root_dir': install_dir.text().strip(), 'fullscreen': fullscreen.isChecked()}
         try:
             binary = dosbox_binary()
             if not binary:
@@ -261,108 +326,82 @@ def configure_media(path, profiles):
             profiles[str(path)] = selected
             save_profiles(profiles)
         except (OSError, RuntimeError, ValueError) as exc:
-            messagebox.showerror('No se pudo montar el CD', str(exc), parent=root)
+            QMessageBox.critical(dialog, 'No se pudo montar el CD', str(exc))
             return
-        root.destroy()
-
-    ttk.Button(buttons, text='Cancelar', command=root.destroy).pack(side='left', padx=(0, 8))
-    ttk.Button(buttons, text='Montar y abrir DOSBox', command=start).pack(side='left')
-    root.mainloop()
+        dialog.accept()
+    start.clicked.connect(run)
+    dialog.exec()
 
 
 def configure(path, profiles):
-    root = tk.Tk()
-    root.title('Abrir juego DOS')
-    root.resizable(False, False)
-    frame = ttk.Frame(root, padding=20)
-    frame.grid(sticky='nsew')
-    ttk.Label(frame, text=path.name, font=('Sans', 13, 'bold')).grid(row=0, column=0, columnspan=2, sticky='w', pady=(0, 4))
-    ttk.Label(frame, text=str(path.parent), wraplength=430).grid(row=1, column=0, columnspan=2, sticky='w', pady=(0, 15))
+    qt_app()
     profile = profiles.get(str(path), {})
     if not isinstance(profile, dict):
         profile = {}
-    fullscreen = tk.BooleanVar(value=bool(profile.get('fullscreen', False)))
-    machine = tk.StringVar(value=next((label for label, val in MACHINES.items() if val == profile.get('machine', '')), 'Predeterminada'))
-    sound = tk.StringVar(value=next((label for label, val in SOUND.items() if val == profile.get('sound', '')), 'Predeterminado'))
-    cycles = tk.StringVar(value=str(profile.get('cycles', '')))
-    shader = tk.StringVar(value=next((label for label, val in SHADERS.items() if val == profile.get('shader', '')), 'Predeterminado (CRT adaptable)'))
-    memory = tk.StringVar(value=next((label for label, val in MEMORY.items() if val == profile.get('memory', '')), 'Predeterminada (16 MB)'))
-    cd = tk.StringVar(value=str(profile.get('cd', '')))
-    mouse = tk.StringVar(value=next((label for label, val in MOUSE_MODES.items() if val == profile.get('mouse', '')), 'Normal (clic para capturar)'))
-    cpu_type = tk.StringVar(value=next((label for label, val in CPU_TYPES.items() if val == profile.get('cpu_type', '')), 'Automática (recomendada)'))
-    keep_open = tk.BooleanVar(value=bool(profile.get('keep_open', False)))
-    root_dir = tk.StringVar(value=str(profile.get('root_dir') or path.parent))
-    ttk.Checkbutton(frame, text='Pantalla completa', variable=fullscreen).grid(row=2, column=0, columnspan=2, sticky='w', pady=(0, 12))
-    ttk.Label(frame, text='Gráficos:').grid(row=3, column=0, sticky='w', pady=5)
-    ttk.Combobox(frame, textvariable=machine, values=list(MACHINES), state='readonly', width=25).grid(row=3, column=1, sticky='w')
-    ttk.Label(frame, text='Sound Blaster:').grid(row=4, column=0, sticky='w', pady=5)
-    ttk.Combobox(frame, textvariable=sound, values=list(SOUND), state='readonly', width=25).grid(row=4, column=1, sticky='w')
-    ttk.Label(frame, text='Ciclos CPU:').grid(row=5, column=0, sticky='w', pady=5)
-    ttk.Entry(frame, textvariable=cycles, width=28).grid(row=5, column=1, sticky='w')
-    ttk.Label(frame, text='Vacío = predeterminado; auto, max o número entre 100 y 1000000.', wraplength=430).grid(row=6, column=0, columnspan=2, sticky='w', pady=(3, 16))
-    ttk.Label(frame, text='Imagen de CD (unidad D:):').grid(row=7, column=0, sticky='w', pady=5)
-    cd_row = ttk.Frame(frame)
-    cd_row.grid(row=7, column=1, sticky='w')
-    ttk.Entry(cd_row, textvariable=cd, width=23).pack(side='left')
-    def choose_cd():
-        selected = filedialog.askopenfilename(parent=root, title='Elegir imagen de CD', filetypes=[('Imágenes de CD', '*.iso *.ISO *.cue *.CUE *.mds *.MDS'), ('Todos', '*')])
-        if selected:
-            cd.set(selected)
-    ttk.Button(cd_row, text='Examinar…', command=choose_cd).pack(side='left', padx=(5, 0))
-    ttk.Label(frame, text='Imagen:').grid(row=8, column=0, sticky='w', pady=5)
-    ttk.Combobox(frame, textvariable=shader, values=list(SHADERS), state='readonly', width=25).grid(row=8, column=1, sticky='w')
-    ttk.Label(frame, text='Memoria RAM:').grid(row=9, column=0, sticky='w', pady=5)
-    ttk.Combobox(frame, textvariable=memory, values=list(MEMORY), state='readonly', width=25).grid(row=9, column=1, sticky='w')
-    ttk.Label(frame, text='Mouse:').grid(row=10, column=0, sticky='w', pady=5)
-    ttk.Combobox(frame, textvariable=mouse, values=list(MOUSE_MODES), state='readonly', width=34).grid(row=10, column=1, sticky='w')
-    ttk.Label(frame, text='Normal: clic dentro del juego para capturar. Ctrl+F10 libera o captura el mouse.', wraplength=430).grid(row=11, column=0, columnspan=2, sticky='w', pady=(3, 6))
-    ttk.Label(frame, text='Tipo de CPU:').grid(row=12, column=0, sticky='w', pady=5)
-    ttk.Combobox(frame, textvariable=cpu_type, values=list(CPU_TYPES), state='readonly', width=34).grid(row=12, column=1, sticky='w')
-    ttk.Label(frame, text='El tipo de CPU es distinto de los ciclos (velocidad).', wraplength=430).grid(row=13, column=0, columnspan=2, sticky='w', pady=(3, 6))
-    ttk.Checkbutton(frame, text='Dejar DOSBox abierto al salir del juego (diagnóstico)', variable=keep_open).grid(row=14, column=0, columnspan=2, sticky='w', pady=(8, 3))
-    ttk.Label(frame, text='Así podés leer cualquier mensaje al terminar el juego. Escribí EXIT para cerrar DOSBox.', wraplength=430).grid(row=15, column=0, columnspan=2, sticky='w', pady=(0, 8))
-    ttk.Label(frame, text='Carpeta montada como C:').grid(row=16, column=0, sticky='w', pady=5)
-    root_row = ttk.Frame(frame)
-    root_row.grid(row=16, column=1, sticky='w')
-    ttk.Entry(root_row, textvariable=root_dir, width=23).pack(side='left')
-    def choose_root():
-        selected = filedialog.askdirectory(parent=root, title='Elegir carpeta que será C:', initialdir=root_dir.get())
-        if selected:
-            root_dir.set(selected)
-    ttk.Button(root_row, text='Examinar…', command=choose_root).pack(side='left', padx=(5, 0))
-    ttk.Label(frame, text='Elegí la carpeta que contiene el juego y los archivos que necesita.', wraplength=430).grid(row=17, column=0, columnspan=2, sticky='w', pady=(2, 8))
-    ttk.Label(frame, text='Los ajustes se guardan al iniciar y se aplican solo a este ejecutable.', wraplength=430).grid(row=18, column=0, columnspan=2, sticky='w', pady=(6, 15))
-    buttons = ttk.Frame(frame)
-    buttons.grid(row=19, column=0, columnspan=2, sticky='e')
-
-    def start():
-        value = cycles.get().strip().lower()
+    dialog, layout, form, outer = dialog_shell('Abrir juego DOS', path.name, path.parent)
+    fullscreen = QCheckBox('Pantalla completa')
+    fullscreen.setChecked(bool(profile.get('fullscreen', False)))
+    layout.addWidget(fullscreen)
+    machine = combo(MACHINES, profile.get('machine', ''))
+    sound = combo(SOUND, profile.get('sound', ''))
+    cycles = QLineEdit(str(profile.get('cycles', '')))
+    cycles.setPlaceholderText('auto, max o 100–1000000')
+    shader = combo(SHADERS, profile.get('shader', ''))
+    memory = combo(MEMORY, profile.get('memory', ''))
+    mouse = combo(MOUSE_MODES, profile.get('mouse', ''))
+    cpu_type = combo(CPU_TYPES, profile.get('cpu_type', ''))
+    cd_row, cd = path_field(profile.get('cd', ''))
+    root_row, root_dir = path_field(profile.get('root_dir') or path.parent, directory=True)
+    form.addRow('Gráficos:', machine)
+    form.addRow('Sound Blaster:', sound)
+    form.addRow('Ciclos CPU:', cycles)
+    form.addRow('Imagen de CD (D:):', cd_row)
+    form.addRow('Imagen:', shader)
+    form.addRow('Memoria RAM:', memory)
+    form.addRow('Mouse:', mouse)
+    form.addRow('Tipo de CPU:', cpu_type)
+    form.addRow('Carpeta montada como C:', root_row)
+    keep_open = QCheckBox('Dejar DOSBox abierto al salir del juego (diagnóstico)')
+    keep_open.setChecked(bool(profile.get('keep_open', False)))
+    layout.addWidget(keep_open)
+    note = QLabel('Los ajustes se guardan para este ejecutable al iniciar. Ctrl+F10 libera o captura el mouse en DOSBox.')
+    note.setWordWrap(True)
+    layout.addWidget(note)
+    buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Cancel)
+    start = buttons.addButton('Guardar e iniciar', QDialogButtonBox.ButtonRole.AcceptRole)
+    buttons.rejected.connect(dialog.reject)
+    outer.addWidget(buttons)
+    def run():
+        value = cycles.text().strip().lower()
         if value and value not in ('auto', 'max') and not (value.isdigit() and 100 <= int(value) <= 1000000):
-            messagebox.showerror('Ciclos CPU', 'Usá auto, max o un número entre 100 y 1000000.', parent=root)
+            QMessageBox.critical(dialog, 'Ciclos CPU', 'Usá auto, max o un número entre 100 y 1000000.')
             return
-        cd_value = cd.get().strip()
+        cd_value = cd.text().strip()
         if cd_value:
             image = Path(cd_value).expanduser().resolve()
             if not image.is_file() or image.suffix.lower() not in CD_EXTENSIONS:
-                messagebox.showerror('Imagen de CD', 'Elegí una imagen .ISO, .CUE o .MDS existente.', parent=root)
+                QMessageBox.critical(dialog, 'Imagen de CD', 'Elegí una imagen .ISO, .CUE o .MDS existente.')
                 return
             cd_value = str(image)
-        selected = {'fullscreen': fullscreen.get(), 'machine': MACHINES[machine.get()], 'sound': SOUND[sound.get()], 'cycles': value, 'cd': cd_value, 'shader': SHADERS[shader.get()], 'memory': MEMORY[memory.get()], 'mouse': MOUSE_MODES[mouse.get()], 'cpu_type': CPU_TYPES[cpu_type.get()], 'keep_open': keep_open.get(), 'root_dir': root_dir.get().strip()}
+        selected = {'fullscreen': fullscreen.isChecked(), 'machine': machine.currentData(),
+                    'sound': sound.currentData(), 'cycles': value, 'cd': cd_value,
+                    'shader': shader.currentData(), 'memory': memory.currentData(),
+                    'mouse': mouse.currentData(), 'cpu_type': cpu_type.currentData(),
+                    'keep_open': keep_open.isChecked(), 'root_dir': root_dir.text().strip()}
         try:
-            if not dosbox_binary():
+            binary = dosbox_binary()
+            if not binary:
                 raise RuntimeError('No se encontró DOSBox Staging. Instalalo antes de iniciar el juego.')
-            command(dosbox_binary(), path, selected)
+            command(binary, path, selected)
             launch(path, selected)
             profiles[str(path)] = selected
             save_profiles(profiles)
         except (OSError, RuntimeError, ValueError) as exc:
-            messagebox.showerror('No se pudo abrir el juego', str(exc), parent=root)
+            QMessageBox.critical(dialog, 'No se pudo abrir el juego', str(exc))
             return
-        root.destroy()
-
-    ttk.Button(buttons, text='Cancelar', command=root.destroy).pack(side='left', padx=(0, 8))
-    ttk.Button(buttons, text='Guardar e iniciar', command=start).pack(side='left')
-    root.mainloop()
+        dialog.accept()
+    start.clicked.connect(run)
+    dialog.exec()
 
 
 def main():
@@ -379,7 +418,7 @@ def main():
             configure_media(path, profiles)
         else:
             configure(path, profiles)
-    except (ValueError, OSError, RuntimeError, tk.TclError) as exc:
+    except (ValueError, OSError, RuntimeError) as exc:
         show_error('Abrir juego DOS', str(exc))
         return 1
     return 0

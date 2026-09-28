@@ -8,10 +8,10 @@ X-KDE-Submenu=Abrir juego DOS
 
 [Desktop Action configure]
 Name=Configurar e iniciar / montar CD
-Icon=applications-games
+Icon=dolphin-dos-launcher
 Exec=@EXECUTABLE@ %f
 
 [Desktop Action quick]
 Name=Iniciar con ajustes guardados
-Icon=media-playback-start
+Icon=dolphin-dos-launcher
 Exec=@EXECUTABLE@ --quick %f

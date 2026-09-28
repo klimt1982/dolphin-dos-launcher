@@ -1,4 +1,4 @@
-# Abrir juego DOS desde Dolphin — prototipo 0.9.1
+# Abrir juego DOS desde Dolphin — versión de prueba Qt
 
 Añade **Abrir juego DOS** al menú contextual de Dolphin y abre archivos locales `.EXE`, `.COM` y `.BAT`, y permite montar imágenes `.ISO`, `.CUE`, `.MDS` y `.BIN` desde el menú mediante **DOSBox Staging**. La ventana permite ajustar pantalla completa, gráficos, Sound Blaster, ciclos de CPU, memoria RAM, aspecto CRT/scanlines y una imagen de CD en la unidad D: y modos de captura/controlador del mouse y tipo de CPU antes de iniciar. Los ajustes quedan asociados al ejecutable en `~/.config/dolphin-dos-launcher/profiles.json` (o `$XDG_CONFIG_HOME/dolphin-dos-launcher/profiles.json`).
 
@@ -6,11 +6,11 @@ Añade **Abrir juego DOS** al menú contextual de Dolphin y abre archivos locale
 
 - KDE Dolphin con menús de servicio KIO.
 - **DOSBox Staging**, disponible como `dosbox-staging` o como `dosbox` cuya versión indique Staging. El DOSBox clásico no sirve para este prototipo.
-- Python 3 con Tkinter (`sudo apt install python3-tk` en Kubuntu).
+- Python 3 con PyQt6 y Qt Wayland (`sudo apt install python3-pyqt6 qt6-wayland` en Kubuntu).
 
 ## Actualización
 
-Ejecutá de nuevo `./install.sh` desde esta carpeta. Reemplaza el lanzador y el menú; conserva los perfiles anteriores.
+Ejecutá de nuevo `./install.sh` desde esta carpeta. Reemplaza el lanzador y el menú; conserva los perfiles anteriores. Esta versión cambia la ventana de Tkinter a Qt y añade un ícono propio.
 
 ## Instalación
 
@@ -32,7 +32,7 @@ Desinstalar deja los perfiles intactos para evitar perder ajustes. Se pueden bor
 
 ## Límites de esta primera versión
 
-DOSBox Staging monta la carpeta que contiene el ejecutable como unidad C:. Se admiten imágenes ISO, CUE/BIN y MDS/MDF como unidad D:; para audio de CD, preferí CUE/BIN o MDS/MDF. Si una configuración local ya ocupa D: puede haber conflicto. Otras unidades, CD físicos y varios discos quedan pendientes. Los perfiles se identifican por ruta completa: si movés un juego, habrá que configurarlo de nuevo. El menú puede aparecer en otros archivos por la clasificación MIME de Dolphin; el programa comprueba la extensión antes de abrir. La ventana usa Tkinter; todavía no tiene apariencia Qt nativa. Los archivos `.EXE` de Windows no son juegos DOS y DOSBox no podrá ejecutarlos.
+DOSBox Staging monta la carpeta que contiene el ejecutable como unidad C:. Se admiten imágenes ISO, CUE/BIN y MDS/MDF como unidad D:; para audio de CD, preferí CUE/BIN o MDS/MDF. Si una configuración local ya ocupa D: puede haber conflicto. Otras unidades, CD físicos y varios discos quedan pendientes. Los perfiles se identifican por ruta completa: si movés un juego, habrá que configurarlo de nuevo. El menú puede aparecer en otros archivos por la clasificación MIME de Dolphin; el programa comprueba la extensión antes de abrir. La ventana usa Qt y puede funcionar como cliente Wayland en una sesión KDE compatible. Los archivos `.EXE` de Windows no son juegos DOS y DOSBox no podrá ejecutarlos.
 
 ## Mouse
 
