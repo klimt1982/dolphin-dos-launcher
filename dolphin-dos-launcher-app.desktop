@@ -1,7 +1,9 @@
 [Desktop Entry]
 Type=Application
-Name=Abrir juego DOS
-Comment=Configurar juegos DOS con DOSBox Staging desde Dolphin
+Name=Open DOS game
+Name[es]=Abrir juego DOS
+Comment=Configure DOS games with DOSBox Staging from Dolphin
+Comment[es]=Configurar juegos DOS con DOSBox Staging desde Dolphin
 Exec=dolphin-dos-launcher %f
 Icon=dolphin-dos-launcher
 NoDisplay=true

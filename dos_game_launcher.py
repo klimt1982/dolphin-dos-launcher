@@ -14,6 +14,7 @@ import shutil
 import subprocess
 import sys
 from PyQt6.QtGui import QIcon, QGuiApplication
+from PyQt6.QtCore import QLocale
 from PyQt6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDialog,
                              QDialogButtonBox, QFileDialog, QFormLayout,
                              QFrame, QHBoxLayout, QLabel, QLineEdit, QMessageBox,
@@ -21,7 +22,7 @@ from PyQt6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDialog,
 from urllib.parse import unquote, urlparse
 
 APP = 'dolphin-dos-launcher'
-VERSION = '1.0.0'
+VERSION = '1.1.0'
 EXTENSIONS = {'.exe', '.com', '.bat'}
 IMAGE_EXTENSIONS = {'.iso', '.cue', '.mds', '.bin'}
 MACHINES = {'Predeterminada': '', 'VGA': 'vgaonly', 'EGA': 'ega', 'CGA': 'cga', 'Hércules': 'hercules'}
@@ -31,6 +32,89 @@ MEMORY = {'Predeterminada (16 MB)': '', '8 MB': '8', '16 MB': '16', '32 MB': '32
 CD_EXTENSIONS = {'.iso', '.cue', '.mds'}
 CPU_TYPES = {'Automática (recomendada)': '', '386': '386', '386 rápido': '386_fast', '386 prefetch (compatibilidad)': '386_prefetch', '486': '486', 'Pentium': 'pentium', 'Pentium MMX': 'pentium_mmx'}
 MOUSE_MODES = {'Normal (clic para capturar)': '', 'Capturar al iniciar': 'onstart', 'Controlador alternativo (no-tsr)': 'no-tsr', 'Alternativo y capturar al iniciar': 'no-tsr-onstart', 'Cargar MOUSE.COM antes del juego': 'load'}
+
+EN = {
+    'Abrir juego DOS': 'Open DOS game',
+    'Montar CD en DOSBox Staging': 'Mount CD in DOSBox Staging',
+    'Predeterminada': 'Default', 'Predeterminado': 'Default',
+    'Hércules': 'Hercules',
+    'Predeterminada (16 MB)': 'Default (16 MB)',
+    'Predeterminado (CRT adaptable)': 'Default (adaptive CRT)',
+    'Automática (recomendada)': 'Automatic (recommended)',
+    '386 rápido': '386 fast', '386 prefetch (compatibilidad)': '386 prefetch (compatibility)',
+    'Normal (clic para capturar)': 'Normal (click to capture)',
+    'Capturar al iniciar': 'Capture on startup',
+    'Controlador alternativo (no-tsr)': 'Alternative driver (no-tsr)',
+    'Alternativo y capturar al iniciar': 'Alternative and capture on startup',
+    'Cargar MOUSE.COM antes del juego': 'Load MOUSE.COM before the game',
+    'Scanlines marcadas': 'Pronounced scanlines',
+    'Sin scanlines (nítido)': 'No scanlines (sharp)',
+    'Gráficos:': 'Graphics:', 'Ciclos CPU:': 'CPU cycles:',
+    'Imagen de CD (D:):': 'CD image (D:):', 'Imagen:': 'Video:',
+    'Memoria RAM:': 'Memory:', 'Mouse:': 'Mouse:',
+    'Tipo de CPU:': 'CPU type:', 'Carpeta montada como C:': 'Folder mounted as C:',
+    'Carpeta C:': 'C: folder:', 'Pantalla completa': 'Fullscreen',
+    'Examinar…': 'Browse…', 'Cancelar': 'Cancel',
+    'Guardar e iniciar': 'Save and launch',
+    'Montar y abrir DOSBox': 'Mount and open DOSBox',
+    'Dejar DOSBox abierto al salir del juego (diagnóstico)': 'Keep DOSBox open when the game exits (diagnostics)',
+    'Los ajustes se guardan para este ejecutable al iniciar. Ctrl+F10 libera o captura el mouse en DOSBox.':
+        'Settings are saved for this executable when launching. Ctrl+F10 releases or captures the mouse in DOSBox.',
+    'El disco se montará como D:. Elegí una carpeta existente donde instalar el juego como C:.':
+        'The disc will be mounted as D:. Choose an existing folder for installing the game as C:.',
+    'DOSBox abrirá D:. Escribí DIR y ejecutá INSTALL o SETUP si corresponde.':
+        'DOSBox will open D:. Type DIR, then run INSTALL or SETUP if appropriate.',
+    'Elegir carpeta C:': 'Choose C: folder', 'Elegir imagen de CD': 'Choose CD image',
+    'Imágenes de CD': 'CD images',
+    'auto, max o 100–1000000': 'auto, max, or 100–1000000',
+    'Ciclos CPU': 'CPU cycles', 'Imagen de CD': 'CD image',
+    'No se pudo montar el CD': 'Could not mount the CD',
+    'No se pudo abrir el juego': 'Could not launch the game',
+    'Usá auto, max o un número entre 100 y 1000000.':
+        'Use auto, max, or a number between 100 and 1000000.',
+    'Elegí una imagen .ISO, .CUE o .MDS existente.':
+        'Choose an existing .ISO, .CUE, or .MDS image.',
+    'No se encontró DOSBox Staging.': 'DOSBox Staging was not found.',
+    'No se encontró DOSBox Staging. Instalalo antes de iniciar el juego.':
+        'DOSBox Staging was not found. Install it before launching the game.',
+    'No se encontró DOSBox Staging. Instalalo y verificá que el comando dosbox-staging (o dosbox de Staging) esté disponible.':
+        'DOSBox Staging was not found. Install it and make sure dosbox-staging (or the Staging dosbox command) is available.',
+    'Seleccioná un archivo local .EXE, .COM, .BAT, .ISO, .CUE, .MDS o .BIN.':
+        'Select a local .EXE, .COM, .BAT, .ISO, .CUE, .MDS, or .BIN file.',
+    'Solo se admiten archivos locales.': 'Only local files are supported.',
+    'La carpeta C: debe contener el ejecutable del juego.':
+        'The C: folder must contain the game executable.',
+    'Elegí una carpeta existente con permiso de escritura para C:.':
+        'Choose an existing writable folder for C:.',
+    'La imagen de CD debe ser un archivo ISO, CUE o MDS existente.':
+        'The CD image must be an existing ISO, CUE, or MDS file.',
+    'Para una imagen BIN elegí su archivo CUE correspondiente. No se encontró uno con el mismo nombre.':
+        'For a BIN image, choose its matching CUE file. No CUE with the same name was found.',
+    'El nombre del archivo de CD contiene acentos; renombrá la imagen y sus referencias CUE/BIN.':
+        'The CD filename contains non-ASCII characters; rename the image and its CUE/BIN references.',
+    'El modo de montaje manual requiere un ejecutable con nombre DOS 8.3 (sin espacios ni acentos).':
+        'Manual mounting requires an executable with a DOS 8.3 filename (no spaces or accents).',
+}
+
+
+def language_setting():
+    settings = config_path().with_name('settings.json')
+    try:
+        value = json.loads(settings.read_text(encoding='utf-8')).get('language', 'auto')
+        return value if value in ('auto', 'es', 'en') else 'auto'
+    except (OSError, ValueError, AttributeError):
+        return 'auto'
+
+
+def language():
+    selected = language_setting()
+    if selected == 'auto':
+        return 'es' if QLocale.system().name().lower().startswith('es') else 'en'
+    return selected
+
+
+def _(value):
+    return EN.get(value, value) if language() == 'en' else value
 
 
 def ascii_mount_path(directory):
@@ -225,7 +309,7 @@ def qt_app():
     if app is None:
         app = QApplication(sys.argv[:1])
         app.setApplicationName('dolphin-dos-launcher')
-        app.setApplicationDisplayName('Abrir juego DOS')
+        app.setApplicationDisplayName(_('Abrir juego DOS'))
         QGuiApplication.setDesktopFileName('dolphin-dos-launcher')
         icon = Path(__file__).with_name('dolphin-dos-launcher.svg')
         if icon.is_file():
@@ -237,7 +321,7 @@ def qt_app():
 def show_error(title, message):
     try:
         qt_app()
-        QMessageBox.critical(None, title, message)
+        QMessageBox.critical(None, _(title), _(message))
     except Exception:
         print(f'{title}: {message}', file=sys.stderr)
 
@@ -245,7 +329,7 @@ def show_error(title, message):
 def combo(options, saved):
     widget = QComboBox()
     for label, value in options.items():
-        widget.addItem(label, value)
+        widget.addItem(_(label), value)
     index = widget.findData(saved)
     widget.setCurrentIndex(max(index, 0))
     return widget
@@ -256,13 +340,13 @@ def path_field(value, directory=False):
     layout = QHBoxLayout(row)
     layout.setContentsMargins(0, 0, 0, 0)
     field = QLineEdit(str(value))
-    button = QPushButton('Examinar…')
+    button = QPushButton(_('Examinar…'))
     def choose():
         if directory:
-            selected = QFileDialog.getExistingDirectory(row, 'Elegir carpeta C:', field.text() or str(Path.home()))
+            selected = QFileDialog.getExistingDirectory(row, _('Elegir carpeta C:'), field.text() or str(Path.home()))
         else:
-            selected, _ = QFileDialog.getOpenFileName(row, 'Elegir imagen de CD', str(Path.home()),
-                                                       'Imágenes de CD (*.iso *.ISO *.cue *.CUE *.mds *.MDS)')
+            selected, _filter = QFileDialog.getOpenFileName(row, _('Elegir imagen de CD'), str(Path.home()),
+                                                       _('Imágenes de CD') + ' (*.iso *.ISO *.cue *.CUE *.mds *.MDS)')
         if selected:
             field.setText(selected)
     button.clicked.connect(choose)
@@ -273,7 +357,7 @@ def path_field(value, directory=False):
 
 def dialog_shell(title, filename, parent_dir):
     dialog = QDialog()
-    dialog.setWindowTitle(title)
+    dialog.setWindowTitle(_(title))
     dialog.setMinimumWidth(570)
     body = QWidget()
     layout = QVBoxLayout(body)
@@ -305,19 +389,20 @@ def configure_media(path, profiles):
     if not isinstance(profile, dict):
         profile = {}
     dialog, layout, form, outer = dialog_shell('Montar CD en DOSBox Staging', path.name, path.parent)
-    note = QLabel('El disco se montará como D:. Elegí una carpeta existente donde instalar el juego como C:.')
+    note = QLabel(_('El disco se montará como D:. Elegí una carpeta existente donde instalar el juego como C:.'))
     note.setWordWrap(True)
     layout.addWidget(note)
     row, install_dir = path_field(profile.get('root_dir') or path.parent, directory=True)
-    form.addRow('Carpeta C:', row)
-    fullscreen = QCheckBox('Pantalla completa')
+    form.addRow(_('Carpeta C:'), row)
+    fullscreen = QCheckBox(_('Pantalla completa'))
     fullscreen.setChecked(bool(profile.get('fullscreen', False)))
     layout.addWidget(fullscreen)
-    note2 = QLabel('DOSBox abrirá D:. Escribí DIR y ejecutá INSTALL o SETUP si corresponde.')
+    note2 = QLabel(_('DOSBox abrirá D:. Escribí DIR y ejecutá INSTALL o SETUP si corresponde.'))
     note2.setWordWrap(True)
     layout.addWidget(note2)
     buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Cancel)
-    start = buttons.addButton('Montar y abrir DOSBox', QDialogButtonBox.ButtonRole.AcceptRole)
+    buttons.button(QDialogButtonBox.StandardButton.Cancel).setText(_('Cancelar'))
+    start = buttons.addButton(_('Montar y abrir DOSBox'), QDialogButtonBox.ButtonRole.AcceptRole)
     buttons.rejected.connect(dialog.reject)
     outer.addWidget(buttons)
     def run():
@@ -331,7 +416,7 @@ def configure_media(path, profiles):
             profiles[str(path)] = selected
             save_profiles(profiles)
         except (OSError, RuntimeError, ValueError) as exc:
-            QMessageBox.critical(dialog, 'No se pudo montar el CD', str(exc))
+            QMessageBox.critical(dialog, _('No se pudo montar el CD'), _(str(exc)))
             return
         dialog.accept()
     start.clicked.connect(run)
@@ -344,48 +429,49 @@ def configure(path, profiles):
     if not isinstance(profile, dict):
         profile = {}
     dialog, layout, form, outer = dialog_shell('Abrir juego DOS', path.name, path.parent)
-    fullscreen = QCheckBox('Pantalla completa')
+    fullscreen = QCheckBox(_('Pantalla completa'))
     fullscreen.setChecked(bool(profile.get('fullscreen', False)))
     layout.addWidget(fullscreen)
     machine = combo(MACHINES, profile.get('machine', ''))
     sound = combo(SOUND, profile.get('sound', ''))
     cycles = QLineEdit(str(profile.get('cycles', '')))
-    cycles.setPlaceholderText('auto, max o 100–1000000')
+    cycles.setPlaceholderText(_('auto, max o 100–1000000'))
     shader = combo(SHADERS, profile.get('shader', ''))
     memory = combo(MEMORY, profile.get('memory', ''))
     mouse = combo(MOUSE_MODES, profile.get('mouse', ''))
     cpu_type = combo(CPU_TYPES, profile.get('cpu_type', ''))
     cd_row, cd = path_field(profile.get('cd', ''))
     root_row, root_dir = path_field(profile.get('root_dir') or path.parent, directory=True)
-    form.addRow('Gráficos:', machine)
+    form.addRow(_('Gráficos:'), machine)
     form.addRow('Sound Blaster:', sound)
-    form.addRow('Ciclos CPU:', cycles)
-    form.addRow('Imagen de CD (D:):', cd_row)
-    form.addRow('Imagen:', shader)
-    form.addRow('Memoria RAM:', memory)
-    form.addRow('Mouse:', mouse)
-    form.addRow('Tipo de CPU:', cpu_type)
-    form.addRow('Carpeta montada como C:', root_row)
-    keep_open = QCheckBox('Dejar DOSBox abierto al salir del juego (diagnóstico)')
+    form.addRow(_('Ciclos CPU:'), cycles)
+    form.addRow(_('Imagen de CD (D:):'), cd_row)
+    form.addRow(_('Imagen:'), shader)
+    form.addRow(_('Memoria RAM:'), memory)
+    form.addRow(_('Mouse:'), mouse)
+    form.addRow(_('Tipo de CPU:'), cpu_type)
+    form.addRow(_('Carpeta montada como C:'), root_row)
+    keep_open = QCheckBox(_('Dejar DOSBox abierto al salir del juego (diagnóstico)'))
     keep_open.setChecked(bool(profile.get('keep_open', False)))
     layout.addWidget(keep_open)
-    note = QLabel('Los ajustes se guardan para este ejecutable al iniciar. Ctrl+F10 libera o captura el mouse en DOSBox.')
+    note = QLabel(_('Los ajustes se guardan para este ejecutable al iniciar. Ctrl+F10 libera o captura el mouse en DOSBox.'))
     note.setWordWrap(True)
     layout.addWidget(note)
     buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Cancel)
-    start = buttons.addButton('Guardar e iniciar', QDialogButtonBox.ButtonRole.AcceptRole)
+    buttons.button(QDialogButtonBox.StandardButton.Cancel).setText(_('Cancelar'))
+    start = buttons.addButton(_('Guardar e iniciar'), QDialogButtonBox.ButtonRole.AcceptRole)
     buttons.rejected.connect(dialog.reject)
     outer.addWidget(buttons)
     def run():
         value = cycles.text().strip().lower()
         if value and value not in ('auto', 'max') and not (value.isdigit() and 100 <= int(value) <= 1000000):
-            QMessageBox.critical(dialog, 'Ciclos CPU', 'Usá auto, max o un número entre 100 y 1000000.')
+            QMessageBox.critical(dialog, _('Ciclos CPU'), _('Usá auto, max o un número entre 100 y 1000000.'))
             return
         cd_value = cd.text().strip()
         if cd_value:
             image = Path(cd_value).expanduser().resolve()
             if not image.is_file() or image.suffix.lower() not in CD_EXTENSIONS:
-                QMessageBox.critical(dialog, 'Imagen de CD', 'Elegí una imagen .ISO, .CUE o .MDS existente.')
+                QMessageBox.critical(dialog, _('Imagen de CD'), _('Elegí una imagen .ISO, .CUE o .MDS existente.'))
                 return
             cd_value = str(image)
         selected = {'fullscreen': fullscreen.isChecked(), 'machine': machine.currentData(),
@@ -402,7 +488,7 @@ def configure(path, profiles):
             profiles[str(path)] = selected
             save_profiles(profiles)
         except (OSError, RuntimeError, ValueError) as exc:
-            QMessageBox.critical(dialog, 'No se pudo abrir el juego', str(exc))
+            QMessageBox.critical(dialog, _('No se pudo abrir el juego'), _(str(exc)))
             return
         dialog.accept()
     start.clicked.connect(run)

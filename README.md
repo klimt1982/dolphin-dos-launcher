@@ -1,8 +1,10 @@
 # Dolphin DOS Launcher
 
+[English documentation](README.en.md)
+
 Menú contextual de KDE Dolphin para abrir juegos DOS con **DOSBox Staging**. Al hacer clic derecho en un `.EXE`, `.COM` o `.BAT`, permite configurar el juego e iniciarlo, o reutilizar su perfil guardado. También monta imágenes `.ISO`, `.CUE`, `.MDS` y `.BIN` como CD para iniciar un instalador desde el prompt de DOS. No adivina el ejecutable de un CD.
 
-**Versión 1.0.0.** Probada en Kubuntu con Plasma Wayland y DOSBox Staging 0.83.0. La ventana de opciones usa Qt 6 (PyQt6). El proyecto es independiente de KDE y DOSBox Staging.
+**Versión 1.1.0.** Probada en Kubuntu con Plasma Wayland y DOSBox Staging 0.83.0. Incluye español e inglés para el menú y el formulario Qt. El idioma se elige durante la instalación. El proyecto es independiente de KDE y DOSBox Staging.
 
 ## Requisitos
 
@@ -22,6 +24,8 @@ Descargá el archivo de la versión, descomprimilo y ejecutá dentro de la carpe
 
 El instalador copia el programa a `~/.local/bin` y el menú de servicio a `~/.local/share/kio/servicemenus` (respeta `XDG_DATA_HOME`). También instala un ícono y una entrada de aplicación oculta para identificar la ventana en Wayland. No necesita `sudo`. Si Dolphin estaba abierto, cerralo y volvé a abrirlo.
 
+El instalador pregunta por **Automático**, **Español** o **English**. Automático usa el idioma del sistema. Enter conserva la elección anterior al actualizar. Si instalás desde un script sin terminal, se usa la elección anterior o Automático. También podés fijarla directamente con `./install.sh --language en` (o `es`, `auto`).
+
 Para actualizar, ejecutá de nuevo `./install.sh` desde la nueva versión. Los perfiles existentes se conservan.
 
 ## Uso
@@ -29,6 +33,8 @@ Para actualizar, ejecutá de nuevo `./install.sh` desde la nueva versión. Los p
 Clic derecho sobre el ejecutable DOS → **Abrir juego DOS** → **Configurar e iniciar / montar CD**. La otra acción, **Iniciar con ajustes guardados**, usa el perfil anterior; si no existe, muestra el formulario.
 
 El formulario permite elegir pantalla completa, gráficos, Sound Blaster, ciclos y tipo de CPU, memoria, imagen CRT/scanlines, captura/controlador de mouse, CD en D:, carpeta C: y dejar abierta la consola al salir. Los perfiles se guardan por ruta absoluta en `~/.config/dolphin-dos-launcher/profiles.json` (o bajo `XDG_CONFIG_HOME`).
+
+El menú y la ventana usan el idioma elegido al instalar. La preferencia se guarda en `~/.config/dolphin-dos-launcher/settings.json`. Podés cambiarla ejecutando el instalador otra vez; no modifica los perfiles de los juegos.
 
 Para una imagen de CD, seleccioná una carpeta existente y escribible como C:. DOSBox abrirá en `D:\>`; usá `DIR` y luego el instalador que corresponda, si el disco tiene uno. Elegí el `.CUE` cuando haya pistas BIN y audio; al seleccionar BIN se busca un CUE con el mismo nombre.
 

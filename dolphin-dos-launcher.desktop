@@ -4,14 +4,17 @@ MimeType=application/octet-stream;application/x-ms-dos-executable;application/x-
 X-KDE-Protocols=file
 X-KDE-RequiredNumberOfUrls=1
 Actions=configure;quick;
-X-KDE-Submenu=Abrir juego DOS
+X-KDE-Submenu=Open DOS game
+X-KDE-Submenu[es]=Abrir juego DOS
 
 [Desktop Action configure]
-Name=Configurar e iniciar / montar CD
+Name=Configure and launch / mount CD
+Name[es]=Configurar e iniciar / montar CD
 Icon=dolphin-dos-launcher
 Exec=@EXECUTABLE@ %f
 
 [Desktop Action quick]
-Name=Iniciar con ajustes guardados
+Name=Launch with saved settings
+Name[es]=Iniciar con ajustes guardados
 Icon=dolphin-dos-launcher
 Exec=@EXECUTABLE@ --quick %f
