@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Per-game DOSBox Staging launcher for KDE Dolphin."""
+"""Per-game DOSBox Staging launcher for KDE Dolphin.
+
+Copyright (C) 2026 Lucas Quiroga
+SPDX-License-Identifier: GPL-3.0-or-later
+"""
 import argparse
 import hashlib
 import json
@@ -17,6 +21,7 @@ from PyQt6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDialog,
 from urllib.parse import unquote, urlparse
 
 APP = 'dolphin-dos-launcher'
+VERSION = '1.0.0'
 EXTENSIONS = {'.exe', '.com', '.bat'}
 IMAGE_EXTENSIONS = {'.iso', '.cue', '.mds', '.bin'}
 MACHINES = {'Predeterminada': '', 'VGA': 'vgaonly', 'EGA': 'ega', 'CGA': 'cga', 'Hércules': 'hercules'}
@@ -406,6 +411,7 @@ def configure(path, profiles):
 
 def main():
     parser = argparse.ArgumentParser(description='Abrir juegos DOS desde Dolphin')
+    parser.add_argument('--version', action='version', version=f'%(prog)s {VERSION}')
     parser.add_argument('--quick', action='store_true', help='Iniciar con la configuración guardada')
     parser.add_argument('file', help='Archivo DOS local .EXE, .COM o .BAT')
     args = parser.parse_args()

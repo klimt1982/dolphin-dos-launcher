@@ -1,63 +1,54 @@
-# Abrir juego DOS desde Dolphin — versión de prueba Qt
+# Dolphin DOS Launcher
 
-Añade **Abrir juego DOS** al menú contextual de Dolphin y abre archivos locales `.EXE`, `.COM` y `.BAT`, y permite montar imágenes `.ISO`, `.CUE`, `.MDS` y `.BIN` desde el menú mediante **DOSBox Staging**. La ventana permite ajustar pantalla completa, gráficos, Sound Blaster, ciclos de CPU, memoria RAM, aspecto CRT/scanlines y una imagen de CD en la unidad D: y modos de captura/controlador del mouse y tipo de CPU antes de iniciar. Los ajustes quedan asociados al ejecutable en `~/.config/dolphin-dos-launcher/profiles.json` (o `$XDG_CONFIG_HOME/dolphin-dos-launcher/profiles.json`).
+Menú contextual de KDE Dolphin para abrir juegos DOS con **DOSBox Staging**. Al hacer clic derecho en un `.EXE`, `.COM` o `.BAT`, permite configurar el juego e iniciarlo, o reutilizar su perfil guardado. También monta imágenes `.ISO`, `.CUE`, `.MDS` y `.BIN` como CD para iniciar un instalador desde el prompt de DOS. No adivina el ejecutable de un CD.
+
+**Versión 1.0.0.** Probada en Kubuntu con Plasma Wayland y DOSBox Staging 0.83.0. La ventana de opciones usa Qt 6 (PyQt6). El proyecto es independiente de KDE y DOSBox Staging.
 
 ## Requisitos
 
-- KDE Dolphin con menús de servicio KIO.
-- **DOSBox Staging**, disponible como `dosbox-staging` o como `dosbox` cuya versión indique Staging. El DOSBox clásico no sirve para este prototipo.
-- Python 3 con PyQt6 y Qt Wayland (`sudo apt install python3-pyqt6 qt6-wayland` en Kubuntu).
+- KDE Dolphin con soporte para menús de servicio KIO.
+- **DOSBox Staging instalado aparte** y disponible como `dosbox-staging` o como `dosbox` cuya versión indique Staging. El DOSBox clásico no sirve.
+- Python 3 y PyQt6. En Kubuntu 26.04: `sudo apt install python3-pyqt6 qt6-wayland`.
 
-## Actualización
-
-Ejecutá de nuevo `./install.sh` desde esta carpeta. Reemplaza el lanzador y el menú; conserva los perfiles anteriores. Esta versión cambia la ventana de Tkinter a Qt y añade un ícono propio.
+La extensión no instala DOSBox Staging ni paquetes del sistema. Comprobá `dosbox-staging --version` antes de instalarla. Si DOSBox está en `~/.local/bin`, esa carpeta debe figurar en `PATH` al iniciar Dolphin.
 
 ## Instalación
 
-Descomprimí el archivo y ejecutá desde una terminal, dentro de su carpeta:
+Descargá el archivo de la versión, descomprimilo y ejecutá dentro de la carpeta `dolphin-dos-launcher`:
 
 ```bash
 ./install.sh
 ```
 
-Si necesitás DOSBox Staging en Kubuntu, comprobá primero qué paquete ofrece tu versión en Discover o apt. Instalalo y volvé a ejecutar el instalador. El script no ejecuta `sudo` ni instala paquetes del sistema.
+El instalador copia el programa a `~/.local/bin` y el menú de servicio a `~/.local/share/kio/servicemenus` (respeta `XDG_DATA_HOME`). También instala un ícono y una entrada de aplicación oculta para identificar la ventana en Wayland. No necesita `sudo`. Si Dolphin estaba abierto, cerralo y volvé a abrirlo.
 
-En Dolphin: clic derecho sobre el archivo del juego → **Abrir juego DOS** → **Configurar e iniciar**. La segunda opción inicia con lo guardado; si aún no hay perfil, muestra la ventana.
+Para actualizar, ejecutá de nuevo `./install.sh` desde la nueva versión. Los perfiles existentes se conservan.
+
+## Uso
+
+Clic derecho sobre el ejecutable DOS → **Abrir juego DOS** → **Configurar e iniciar / montar CD**. La otra acción, **Iniciar con ajustes guardados**, usa el perfil anterior; si no existe, muestra el formulario.
+
+El formulario permite elegir pantalla completa, gráficos, Sound Blaster, ciclos y tipo de CPU, memoria, imagen CRT/scanlines, captura/controlador de mouse, CD en D:, carpeta C: y dejar abierta la consola al salir. Los perfiles se guardan por ruta absoluta en `~/.config/dolphin-dos-launcher/profiles.json` (o bajo `XDG_CONFIG_HOME`).
+
+Para una imagen de CD, seleccioná una carpeta existente y escribible como C:. DOSBox abrirá en `D:\>`; usá `DIR` y luego el instalador que corresponda, si el disco tiene uno. Elegí el `.CUE` cuando haya pistas BIN y audio; al seleccionar BIN se busca un CUE con el mismo nombre.
+
+## Desinstalación
 
 ```bash
 ./uninstall.sh
 ```
 
-Desinstalar deja los perfiles intactos para evitar perder ajustes. Se pueden borrar manualmente después.
+El desinstalador quita los archivos instalados por este proyecto y conserva los perfiles. Si querés borrarlos, eliminá manualmente `~/.config/dolphin-dos-launcher/profiles.json`.
 
-## Límites de esta primera versión
+## Límites conocidos
 
-DOSBox Staging monta la carpeta que contiene el ejecutable como unidad C:. Se admiten imágenes ISO, CUE/BIN y MDS/MDF como unidad D:; para audio de CD, preferí CUE/BIN o MDS/MDF. Si una configuración local ya ocupa D: puede haber conflicto. Otras unidades, CD físicos y varios discos quedan pendientes. Los perfiles se identifican por ruta completa: si movés un juego, habrá que configurarlo de nuevo. El menú puede aparecer en otros archivos por la clasificación MIME de Dolphin; el programa comprueba la extensión antes de abrir. La ventana usa Qt y puede funcionar como cliente Wayland en una sesión KDE compatible. Los archivos `.EXE` de Windows no son juegos DOS y DOSBox no podrá ejecutarlos.
+- Se montan ISO, CUE/BIN y MDS/MDF como D:. No se admiten varios discos ni unidades de CD físicas.
+- Un ejecutable Windows no funcionará en DOSBox. Algunas imágenes incluyen sólo instaladores Windows.
+- Los perfiles se identifican por ruta: mover un juego requiere volver a configurarlo.
+- El modo con carpeta C: personalizada o consola abierta exige que el ejecutable tenga un nombre DOS 8.3 sin espacios ni acentos. Para carpetas con caracteres fuera de ASCII se crea un enlace auxiliar en la caché; no se renombra el juego.
+- El menú puede aparecer sobre archivos que no son DOS debido a su tipo MIME. El programa valida la extensión al abrir.
+- Algunos juegos requieren activar el mouse en su propio SETUP. Dentro de DOSBox, `Ctrl+F10` alterna la captura.
 
-## Mouse
+## Código y licencia
 
-DOSBox Staging ya emula un mouse DOS de dos botones. Primero hacé clic dentro de la ventana del juego; `Ctrl+F10` alterna captura/liberación. Si el juego sigue sin detectarlo, elegí el modo de controlador alternativo `no-tsr`. Algunos juegos requieren activar “Mouse” en su propio menú o ejecutar su programa SETUP. Estas opciones no agregan soporte de mouse a un juego que no lo trae.
-
-## Tipo de CPU
-
-Dejá Automática salvo que el juego necesite otra arquitectura. 386 prefetch activa también el núcleo normal requerido por DOSBox Staging. Los ciclos regulan la velocidad por separado.
-
-## Diagnóstico de cierre inmediato
-
-Marcá «Dejar DOSBox abierto al salir del juego» para que el emulador no cierre automáticamente y puedas leer el mensaje que produjo el juego. Escribí `EXIT` en el prompt DOS para cerrar. Esta opción ayuda a identificar si faltan archivos, CD, configuración u otra condición.
-
-## Rutas de juegos y detección del mouse
-
-La carpeta C: se puede elegir por juego. Debe contener el ejecutable y, si el juego lo necesita, sus subcarpetas de datos. Con una carpeta C: más amplia, el lanzador cambia al subdirectorio del ejecutable antes de iniciarlo. Para un juego que informe «mouse no detectado», el modo «Cargar MOUSE.COM antes del juego» desactiva el controlador residente automático y ejecuta MOUSE explícitamente. Es un intento de compatibilidad, no garantiza que todos los juegos reconozcan el mouse.
-
-## Ejecución con carpeta C: personalizada
-
-Se corrigió la orden DOS para iniciar automáticamente el ejecutable cuando se utiliza una carpeta C: personalizada o se deja abierta la consola. En ese modo el archivo debe tener un nombre DOS 8.3 sin espacios ni acentos.
-
-## Rutas con caracteres fuera de ASCII
-
-Para carpetas como `Clyde´s Adventure`, la aplicación crea un enlace simbólico auxiliar con nombre ASCII en `~/.cache/dolphin-dos-launcher/mounts/` y monta ese enlace como C:. No renombra ni mueve el juego. Si hay subcarpetas con acentos entre C: y el ejecutable, elegí directamente la carpeta del ejecutable como C:.
-
-## Abrir una imagen de CD
-
-Clic derecho en una imagen ISO, CUE, MDS o BIN → «Configurar e iniciar / montar CD». Elegí una carpeta existente con permiso de escritura como unidad C: para instalar el juego. El disco queda en D: y DOSBox abre el prompt `D:\>`; ejecutá `DIR` y luego el instalador del CD, normalmente `INSTALL` o `SETUP`. Para BIN elegí preferentemente el archivo CUE asociado; si elegís BIN, el programa busca un CUE con el mismo nombre. El CUE debe conservar sus pistas de audio junto a él. Algunas imágenes contienen instaladores de Windows y no se pueden ejecutar en DOSBox.
+Código fuente: <https://github.com/klimt1982/dolphin-dos-launcher>. Licencia **GNU GPL v3 o posterior**; consultá [COPYING](COPYING). DOSBox Staging se distribuye por separado bajo su propia licencia.

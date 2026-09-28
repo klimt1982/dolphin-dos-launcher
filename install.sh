@@ -27,4 +27,4 @@ value = source.read_text(encoding='utf-8').replace('@EXECUTABLE@', '"' + str(exe
 target.write_text(value, encoding='utf-8')
 target.chmod(0o755)
 PYINSTALL
-printf 'Instalado. Abrí Dolphin y hacé clic derecho en un archivo DOS .EXE, .COM o .BAT.\n'
+printf 'Instalado. Abrí Dolphin y hacé clic derecho en un archivo DOS .EXE, .COM o .BAT, o una imagen de CD .ISO, .CUE, .MDS o .BIN.\n'
