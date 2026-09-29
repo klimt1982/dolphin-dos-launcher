@@ -1,11 +1,14 @@
 # Cambios
 
+## 1.1.1 — 2026-09-28
+
+- Identificador de aplicación propio para mostrar el ícono correcto en la barra de tareas de Plasma Wayland.
+
 ## 1.1.0 — 2026-09-28
 
 - Menú contextual localizado en español e inglés según KDE.
 - Selector de idioma durante la instalación: automático, español o inglés.
 - Preferencia de idioma separada de los perfiles de juegos.
-- Identificador de aplicación propio para mostrar el ícono correcto en la barra de tareas de Plasma Wayland.
 
 ## 1.0.0 — 2026-09-28
 

@@ -22,7 +22,7 @@ from PyQt6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDialog,
 from urllib.parse import unquote, urlparse
 
 APP = 'dolphin-dos-launcher'
-VERSION = '1.1.0'
+VERSION = '1.1.1'
 EXTENSIONS = {'.exe', '.com', '.bat'}
 IMAGE_EXTENSIONS = {'.iso', '.cue', '.mds', '.bin'}
 MACHINES = {'Predeterminada': '', 'VGA': 'vgaonly', 'EGA': 'ega', 'CGA': 'cga', 'Hércules': 'hercules'}

@@ -4,7 +4,7 @@
 
 A KDE Dolphin context menu for launching DOS games with **DOSBox Staging**. Right-click a DOS `.EXE`, `.COM`, or `.BAT` file to configure and launch it, or use its saved per-game profile. You can also mount `.ISO`, `.CUE`, `.MDS`, and `.BIN` CD images and run their DOS installer manually. The launcher cannot infer which program on a CD should be run.
 
-**Version 1.1.0.** Tested on Kubuntu with Plasma Wayland and DOSBox Staging 0.83.0. The installer offers automatic, Spanish, and English UI language choices. This project is independent of KDE and DOSBox Staging.
+**Version 1.1.1.** Tested on Kubuntu with Plasma Wayland and DOSBox Staging 0.83.0. The installer offers automatic, Spanish, and English UI language choices. This project is independent of KDE and DOSBox Staging.
 
 ## Requirements
 

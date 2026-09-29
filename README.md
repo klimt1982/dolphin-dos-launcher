@@ -4,7 +4,7 @@
 
 Menú contextual de KDE Dolphin para abrir juegos DOS con **DOSBox Staging**. Al hacer clic derecho en un `.EXE`, `.COM` o `.BAT`, permite configurar el juego e iniciarlo, o reutilizar su perfil guardado. También monta imágenes `.ISO`, `.CUE`, `.MDS` y `.BIN` como CD para iniciar un instalador desde el prompt de DOS. No adivina el ejecutable de un CD.
 
-**Versión 1.1.0.** Probada en Kubuntu con Plasma Wayland y DOSBox Staging 0.83.0. Incluye español e inglés para el menú y el formulario Qt. El idioma se elige durante la instalación. El proyecto es independiente de KDE y DOSBox Staging.
+**Versión 1.1.1.** Probada en Kubuntu con Plasma Wayland y DOSBox Staging 0.83.0. Incluye español e inglés para el menú y el formulario Qt. El idioma se elige durante la instalación. El proyecto es independiente de KDE y DOSBox Staging.
 
 ## Requisitos
 
