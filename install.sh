@@ -54,7 +54,7 @@ base, menu, apps, binary = map(pathlib.Path, sys.argv[1:5])
 settings = pathlib.Path(sys.argv[5])
 language = sys.argv[6]
 
-def desktop(source, target, executable=None):
+def desktop(source, target, executable=None, icon=None):
     lines = source.read_text(encoding='utf-8').splitlines()
     spanish = {}
     group = ''
@@ -80,12 +80,17 @@ def desktop(source, target, executable=None):
     if executable is not None:
         # Quote the fixed program path in Desktop Entry syntax; %f remains separate.
         content = content.replace('@EXECUTABLE@', '"' + str(executable).replace('"', r'\"') + '"')
+    if icon is not None:
+        content = content.replace('@ICON@', str(icon))
     target.write_text(content, encoding='utf-8')
 
 desktop(base / 'dolphin-dos-launcher.desktop', menu / 'dolphin-dos-launcher.desktop',
         binary / 'dolphin-dos-launcher')
 (menu / 'dolphin-dos-launcher.desktop').chmod(0o755)
-desktop(base / 'dolphin-dos-launcher-app.desktop', apps / 'dolphin-dos-launcher.desktop')
+desktop(base / 'dolphin-dos-launcher-app.desktop', apps / 'io.github.klimt1982.dolphin-dos-launcher.desktop',
+        binary / 'dolphin-dos-launcher',
+        apps.parent / 'icons/hicolor/scalable/apps/dolphin-dos-launcher.svg')
+(apps / 'dolphin-dos-launcher.desktop').unlink(missing_ok=True)
 try:
     value = json.loads(settings.read_text(encoding='utf-8'))
     if not isinstance(value, dict):

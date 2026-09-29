@@ -22,7 +22,7 @@ Descargá el archivo de la versión, descomprimilo y ejecutá dentro de la carpe
 ./install.sh
 ```
 
-El instalador copia el programa a `~/.local/bin` y el menú de servicio a `~/.local/share/kio/servicemenus` (respeta `XDG_DATA_HOME`). También instala un ícono y una entrada de aplicación oculta para identificar la ventana en Wayland. No necesita `sudo`. Si Dolphin estaba abierto, cerralo y volvé a abrirlo.
+El instalador copia el programa a `~/.local/bin` y el menú de servicio a `~/.local/share/kio/servicemenus` (respeta `XDG_DATA_HOME`). También instala un ícono y una entrada de aplicación oculta con identificador propio para mostrar el ícono de la ventana en Plasma Wayland. No necesita `sudo`. Si Dolphin estaba abierto, cerralo y volvé a abrirlo.
 
 El instalador pregunta por **Automático**, **Español** o **English**. Automático usa el idioma del sistema. Enter conserva la elección anterior al actualizar. Si instalás desde un script sin terminal, se usa la elección anterior o Automático. También podés fijarla directamente con `./install.sh --language en` (o `es`, `auto`).
 

@@ -310,7 +310,7 @@ def qt_app():
         app = QApplication(sys.argv[:1])
         app.setApplicationName('dolphin-dos-launcher')
         app.setApplicationDisplayName(_('Abrir juego DOS'))
-        QGuiApplication.setDesktopFileName('dolphin-dos-launcher')
+        QGuiApplication.setDesktopFileName('io.github.klimt1982.dolphin-dos-launcher')
         icon = Path(__file__).with_name('dolphin-dos-launcher.svg')
         if icon.is_file():
             app.setWindowIcon(QIcon(str(icon)))
