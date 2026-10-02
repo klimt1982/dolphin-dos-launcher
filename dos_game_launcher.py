@@ -22,7 +22,7 @@ from PyQt6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDialog,
 from urllib.parse import unquote, urlparse
 
 APP = 'dolphin-dos-launcher'
-VERSION = '1.1.1'
+VERSION = '1.2.0'
 EXTENSIONS = {'.exe', '.com', '.bat'}
 IMAGE_EXTENSIONS = {'.iso', '.cue', '.mds', '.bin'}
 MACHINES = {'Predeterminada': '', 'VGA': 'vgaonly', 'EGA': 'ega', 'CGA': 'cga', 'Hércules': 'hercules'}
@@ -204,6 +204,10 @@ def save_profiles(profiles):
 
 
 def dosbox_binary():
+    # The Debian package carries its own tested emulator beside this script.
+    bundled = Path(__file__).resolve().parent / 'dosbox-staging' / 'dosbox'
+    if bundled.is_file() and os.access(bundled, os.X_OK):
+        return str(bundled)
     # Distributions may name the Staging binary 'dosbox' or 'dosbox-staging'.
     for name in ('dosbox-staging', 'dosbox'):
         found = shutil.which(name)
@@ -311,7 +315,7 @@ def qt_app():
         app.setApplicationName('dolphin-dos-launcher')
         app.setApplicationDisplayName(_('Abrir juego DOS'))
         QGuiApplication.setDesktopFileName('io.github.klimt1982.dolphin-dos-launcher')
-        icon = Path(__file__).with_name('dolphin-dos-launcher.svg')
+        icon = Path(__file__).resolve().with_name('dolphin-dos-launcher.svg')
         if icon.is_file():
             app.setWindowIcon(QIcon(str(icon)))
     _qt_application = app

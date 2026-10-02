@@ -4,17 +4,32 @@
 
 Menú contextual de KDE Dolphin para abrir juegos DOS con **DOSBox Staging**. Al hacer clic derecho en un `.EXE`, `.COM` o `.BAT`, permite configurar el juego e iniciarlo, o reutilizar su perfil guardado. También monta imágenes `.ISO`, `.CUE`, `.MDS` y `.BIN` como CD para iniciar un instalador desde el prompt de DOS. No adivina el ejecutable de un CD.
 
-**Versión 1.1.1.** Probada en Kubuntu con Plasma Wayland y DOSBox Staging 0.83.0. Incluye español e inglés para el menú y el formulario Qt. El idioma se elige durante la instalación. El proyecto es independiente de KDE y DOSBox Staging.
+**Versión 1.2.0.** Probada en Kubuntu con Plasma Wayland y DOSBox Staging 0.83.0. Incluye español e inglés para el menú y el formulario Qt. El idioma se elige durante la instalación. El proyecto es independiente de KDE y DOSBox Staging.
 
-## Requisitos
+## Instalación simplificada en Kubuntu/Ubuntu (amd64)
+
+El paquete DEB incluye DOSBox Staging 0.83.0. Desde su carpeta ejecutá:
+
+```bash
+sudo apt install ./dolphin-dos-launcher_1.2.0_amd64.deb
+```
+
+APT instala las dependencias automáticamente. Reiniciá Dolphin. Probado en
+Kubuntu 26.04 con Wayland; destinado a Ubuntu/Kubuntu 24.04 o posterior.
+Si usabas el ZIP, ejecutá primero su `./uninstall.sh` sin sudo: conserva perfiles
+e idioma. Si ya instalaste el DEB beta, APT lo actualiza directamente.
+El DEB nuevo usa el idioma del sistema y conserva preferencias existentes.
+Más detalles: [guía del paquete](packaging/README.md).
+
+## Requisitos para instalación manual con ZIP
 
 - KDE Dolphin con soporte para menús de servicio KIO.
 - **DOSBox Staging instalado aparte** y disponible como `dosbox-staging` o como `dosbox` cuya versión indique Staging. El DOSBox clásico no sirve.
 - Python 3 y PyQt6. En Kubuntu 26.04: `sudo apt install python3-pyqt6 qt6-wayland`.
 
-La extensión no instala DOSBox Staging ni paquetes del sistema. Comprobá `dosbox-staging --version` antes de instalarla. Si DOSBox está en `~/.local/bin`, esa carpeta debe figurar en `PATH` al iniciar Dolphin.
+El instalador manual del ZIP no instala DOSBox Staging ni paquetes del sistema. Comprobá `dosbox-staging --version` antes de instalarla. Si DOSBox está en `~/.local/bin`, esa carpeta debe figurar en `PATH` al iniciar Dolphin.
 
-## Instalación
+## Instalación manual con ZIP
 
 Descargá el archivo de la versión, descomprimilo y ejecutá dentro de la carpeta `dolphin-dos-launcher`:
 
@@ -36,9 +51,16 @@ El formulario permite elegir pantalla completa, gráficos, Sound Blaster, ciclos
 
 El menú y la ventana usan el idioma elegido al instalar. La preferencia se guarda en `~/.config/dolphin-dos-launcher/settings.json`. Podés cambiarla ejecutando el instalador otra vez; no modifica los perfiles de los juegos.
 
+Para juegos en CD como Warcraft II, primero instalá el juego dentro de DOSBox
+en la carpeta elegida como C:. Después abrí el ejecutable instalado desde
+Dolphin y seleccioná el mismo CD en el formulario. Al guardar, los siguientes
+arranques reutilizan ese perfil.
+
 Para una imagen de CD, seleccioná una carpeta existente y escribible como C:. DOSBox abrirá en `D:\>`; usá `DIR` y luego el instalador que corresponda, si el disco tiene uno. Elegí el `.CUE` cuando haya pistas BIN y audio; al seleccionar BIN se busca un CUE con el mismo nombre.
 
 ## Desinstalación
+
+Para el DEB: `sudo apt remove dolphin-dos-launcher`. Para el ZIP:
 
 ```bash
 ./uninstall.sh

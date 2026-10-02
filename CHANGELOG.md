@@ -1,5 +1,12 @@
 # Cambios
 
+## 1.2.0 — 2026-10-02
+
+- Paquete DEB amd64 con DOSBox Staging 0.83.0 oficial incluido.
+- PyQt6 y bibliotecas de sistema declaradas para instalación automática con APT.
+- Integración del sistema en Dolphin y Plasma, conservando perfiles por usuario.
+- Script de construcción con checksum fijado y guía de migración desde el ZIP.
+
 ## 1.1.1 — 2026-09-28
 
 - Identificador de aplicación propio para mostrar el ícono correcto en la barra de tareas de Plasma Wayland.
